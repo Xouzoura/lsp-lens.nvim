@@ -49,7 +49,23 @@ local function get_functions(result)
         })
       end
     end
-
+    if v.kind == vim.lsp.protocol.SymbolKind.Class then
+      if v.children then
+        for _, child in ipairs(v.children) do
+          if vim.tbl_contains(config.config.target_symbol_kinds, child.kind) then
+            if child.range and child.range.start then
+              table.insert(ret, {
+                name = child.name,
+                rangeStart = child.range.start,
+                rangeEnd = child.range["end"],
+                selectionRangeStart = child.selectionRange.start,
+                selectionRangeEnd = child.selectionRange["end"],
+              })
+            end
+          end
+        end
+      end
+    end
     if vim.tbl_contains(config.config.wrapper_symbol_kinds, v.kind) then
       ret = utils:merge_table(ret, get_functions(v.children)) -- Recursively find methods
     end
